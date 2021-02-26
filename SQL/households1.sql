@@ -69,88 +69,192 @@ group by candidate
 order by 2 desc
 limit 5;
 
-
---rozkład głosów dla kwantyla 0.1
-with p0_10 as(
-select 
-rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_0_10
+--rozkład głosów dla top 5 kandydatów - czas dojazdu do pracy
+with candidates as
+(
+select candidate,
+sum(votes) as all_votes
 from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work < (select percentile_disc(0.1) within group(order by time_to_work) from results_households rh)
-group by rh.candidate, c.all_votes)
-, p10_25 as(  --rozkład głosów dla przedziału 0.1-0.25
+group by candidate
+order by 2 desc
+limit 5
+)
+, percentyle as 
+(
 select 
-rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_10_25
+percentile_disc(0.1) within group(order by time_to_work) as p_10,
+percentile_disc(0.25) within group(order by time_to_work) as p_25,
+percentile_disc(0.5) within group(order by time_to_work) as p_50,
+percentile_disc(0.75) within group(order by time_to_work) as p_75,
+percentile_disc(0.9) within group(order by time_to_work) as p_90
 from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work >= (select percentile_disc(0.1) within group(order by time_to_work) from results_households rh) 
-and time_to_work <
-(select percentile_disc(0.25) within group(order by time_to_work) from results_households rh) 
-group by rh.candidate, c.all_votes)
-, p25_50 as (--rozkład głosów dla przedziału 0.25-0.5
-select 
+)
+, sumy as
+(
+select distinct 
 rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_25_50
+sum(rh.votes) filter(where time_to_work<p.p_10) as p10,
+sum(rh.votes) filter(where time_to_work>=p.p_10 and time_to_work <p.p_25) as p10_25,
+sum(rh.votes) filter(where time_to_work>=p.p_25 and time_to_work <p.p_50) as p25_50,
+sum(rh.votes) filter(where time_to_work>=p.p_50 and time_to_work <p.p_75) as p50_75,
+sum(rh.votes) filter(where time_to_work>=p.p_75 and time_to_work <p.p_90) as p75_90,
+sum(rh.votes) filter(where time_to_work>= p.p_90) as p90
 from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work >= (select percentile_disc(0.25) within group(order by time_to_work) from results_households rh) 
-and time_to_work <
-(select percentile_disc(0.5) within group(order by time_to_work) from results_households rh) 
-group by rh.candidate, c.all_votes)
-, p50_75 as (--rozkład głosów dla przedziału 0.5-0.75
-select 
-rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_50_75
-from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work >= (select percentile_disc(0.5) within group(order by time_to_work) from results_households rh) 
-and time_to_work <
-(select percentile_disc(0.75) within group(order by time_to_work) from results_households rh) 
-group by rh.candidate, c.all_votes)
-, p75_90 as ( --rozkład głosów dla przedziału 0.75-0.9
-select 
-rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_75_90
-from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work >= (select percentile_disc(0.75) within group(order by time_to_work) from results_households rh) 
-and time_to_work <
-(select percentile_disc(0.9) within group(order by time_to_work) from results_households rh) 
-group by rh.candidate, c.all_votes)
-, p_90 as (--rozkład głosów dla kwantyla 0.9
-select 
-rh.candidate,
-round(sum(votes)::decimal/c.all_votes *100,2) as perc_90
-from results_households rh
-join candidate c on rh.candidate=c.candidate
-where time_to_work >= (select percentile_disc(0.9) within group(order by time_to_work) from results_households rh)
-group by rh.candidate, c.all_votes
+join candidates c on rh.candidate=c.candidate
+cross join percentyle p
+group by rh.candidate
 )
 select 
-p0_10.*,
-p10_25.perc_10_25,
-p25_50.perc_25_50,
-p50_75.perc_50_75,
-p75_90.perc_75_90,
-p_90.perc_90
-from p0_10
-join p10_25 on p0_10.candidate=p10_25.candidate
-join p25_50 on p0_10.candidate=p25_50.candidate
-join p50_75 on p0_10.candidate=p50_75.candidate
-join p75_90 on p0_10.candidate=p75_90.candidate
-join p_90 on p0_10.candidate=p_90.candidate;
+c.candidate,
+round(s.p10::decimal/c.all_votes *100,2) as per10,
+round(s.p10_25::decimal/c.all_votes *100,2) as per10_25,
+round(s.p25_50::decimal/c.all_votes *100,2) as per25_50,
+round(s.p50_75::decimal/c.all_votes *100,2) as per50_75,
+round(s.p75_90::decimal/c.all_votes *100,2) as per75_90,
+round(s.p90::decimal/c.all_votes *100,2) as per90
+from candidates c
+join sumy s on c.candidate=s.candidate;
 
 
 
+--rozkład głosów dla top 5 kandydatów - ilość mieszkańców na 1 milę kw
+with candidates as
+(
+select candidate,
+sum(votes) as all_votes
+from results_households rh
+group by candidate
+order by 2 desc
+limit 5
+)
+, percentyle as 
+(
+select 
+percentile_disc(0.1) within group(order by pop_per_sq_mile) as p_10,
+percentile_disc(0.25) within group(order by pop_per_sq_mile) as p_25,
+percentile_disc(0.5) within group(order by pop_per_sq_mile) as p_50,
+percentile_disc(0.75) within group(order by pop_per_sq_mile) as p_75,
+percentile_disc(0.9) within group(order by pop_per_sq_mile) as p_90
+from results_households rh
+)
+, sumy as
+(
+select distinct 
+rh.candidate,
+sum(rh.votes) filter(where pop_per_sq_mile<p.p_10) as p10,
+sum(rh.votes) filter(where pop_per_sq_mile>=p.p_10 and pop_per_sq_mile <p.p_25) as p10_25,
+sum(rh.votes) filter(where pop_per_sq_mile>=p.p_25 and pop_per_sq_mile <p.p_50) as p25_50,
+sum(rh.votes) filter(where pop_per_sq_mile>=p.p_50 and pop_per_sq_mile <p.p_75) as p50_75,
+sum(rh.votes) filter(where pop_per_sq_mile>=p.p_75 and pop_per_sq_mile <p.p_90) as p75_90,
+sum(rh.votes) filter(where pop_per_sq_mile>= p.p_90) as p90
+from results_households rh
+join candidates c on rh.candidate=c.candidate
+cross join percentyle p
+group by rh.candidate
+)
+select 
+c.candidate,
+round(s.p10::decimal/c.all_votes *100,2) as per10,
+round(s.p10_25::decimal/c.all_votes *100,2) as per10_25,
+round(s.p25_50::decimal/c.all_votes *100,2) as per25_50,
+round(s.p50_75::decimal/c.all_votes *100,2) as per50_75,
+round(s.p75_90::decimal/c.all_votes *100,2) as per75_90,
+round(s.p90::decimal/c.all_votes *100,2) as per90
+from candidates c
+join sumy s on c.candidate=s.candidate;
 
 
+--rozkład głosów dla top 5 kandydatów - ilość mieszkańców w na gosp dom
+with candidates as
+(
+select candidate,
+sum(votes) as all_votes
+from results_households rh
+group by candidate
+order by 2 desc
+limit 5
+)
+, percentyle as 
+(
+select 
+percentile_disc(0.1) within group(order by p_per_households) as p_10,
+percentile_disc(0.25) within group(order by p_per_households) as p_25,
+percentile_disc(0.5) within group(order by p_per_households) as p_50,
+percentile_disc(0.75) within group(order by p_per_households) as p_75,
+percentile_disc(0.9) within group(order by p_per_households) as p_90
+from results_households rh
+)
+, sumy as
+(
+select distinct 
+rh.candidate,
+sum(rh.votes) filter(where p_per_households<p.p_10) as p10,
+sum(rh.votes) filter(where p_per_households>=p.p_10 and p_per_households <p.p_25) as p10_25,
+sum(rh.votes) filter(where p_per_households>=p.p_25 and p_per_households <p.p_50) as p25_50,
+sum(rh.votes) filter(where p_per_households>=p.p_50 and p_per_households <p.p_75) as p50_75,
+sum(rh.votes) filter(where p_per_households>=p.p_75 and p_per_households <p.p_90) as p75_90,
+sum(rh.votes) filter(where p_per_households>= p.p_90) as p90
+from results_households rh
+join candidates c on rh.candidate=c.candidate
+cross join percentyle p
+group by rh.candidate
+)
+select 
+c.candidate,
+round(s.p10::decimal/c.all_votes *100,2) as per10,
+round(s.p10_25::decimal/c.all_votes *100,2) as per10_25,
+round(s.p25_50::decimal/c.all_votes *100,2) as per25_50,
+round(s.p50_75::decimal/c.all_votes *100,2) as per50_75,
+round(s.p75_90::decimal/c.all_votes *100,2) as per75_90,
+round(s.p90::decimal/c.all_votes *100,2) as per90
+from candidates c
+join sumy s on c.candidate=s.candidate;
 
-
-
-
-
+--rozkład głosów dla top 5 kandydatów - właściciele domów
+with candidates as
+(
+select candidate,
+sum(votes) as all_votes
+from results_households rh
+group by candidate
+order by 2 desc
+limit 5
+)
+, percentyle as 
+(
+select 
+percentile_disc(0.1) within group(order by homeownership) as p_10,
+percentile_disc(0.25) within group(order by homeownership) as p_25,
+percentile_disc(0.5) within group(order by homeownership) as p_50,
+percentile_disc(0.75) within group(order by homeownership) as p_75,
+percentile_disc(0.9) within group(order by homeownership) as p_90
+from results_households rh
+)
+, sumy as
+(
+select distinct 
+rh.candidate,
+sum(rh.votes) filter(where homeownership<p.p_10) as p10,
+sum(rh.votes) filter(where homeownership>=p.p_10 and homeownership <p.p_25) as p10_25,
+sum(rh.votes) filter(where homeownership>=p.p_25 and homeownership <p.p_50) as p25_50,
+sum(rh.votes) filter(where homeownership>=p.p_50 and homeownership <p.p_75) as p50_75,
+sum(rh.votes) filter(where homeownership>=p.p_75 and homeownership <p.p_90) as p75_90,
+sum(rh.votes) filter(where homeownership>= p.p_90) as p90
+from results_households rh
+join candidates c on rh.candidate=c.candidate
+cross join percentyle p
+group by rh.candidate
+)
+select 
+c.candidate,
+round(s.p10::decimal/c.all_votes *100,2) as per10,
+round(s.p10_25::decimal/c.all_votes *100,2) as per10_25,
+round(s.p25_50::decimal/c.all_votes *100,2) as per25_50,
+round(s.p50_75::decimal/c.all_votes *100,2) as per50_75,
+round(s.p75_90::decimal/c.all_votes *100,2) as per75_90,
+round(s.p90::decimal/c.all_votes *100,2) as per90
+from candidates c
+join sumy s on c.candidate=s.candidate;
 
 
 
