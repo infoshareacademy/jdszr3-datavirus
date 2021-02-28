@@ -1,0 +1,415 @@
+--analiza wlasciwa
+--spr sumy glosow i sr frakcji po stanie
+create view v_wyniki_po_stanach as
+select pr.state,
+	   pr.candidate,
+	   sum(pr.votes),
+	   avg(fraction_votes),
+	   row_number() over(partition by pr.state order by sum(pr.votes) desc)
+from primary_results pr
+group by 1, 2
+order by 1, 3 desc;
+--wygrani po stanach
+create view v_wygrani_po_stanach as
+select * 
+from v_wyniki_po_stanach
+where row_number = 1 ;
+--stany, w ktorych wygral Donald Trump
+create view v_wygrane_donalda as
+select * 
+from v_wyniki_po_stanach
+where lower(candidate) = 'donald trump'
+order by sum desc ; 
+--stany, w ktorych wygrala Hillary Clinton
+create view v_wygrane_hillary as
+select * 
+from v_wyniki_po_stanach
+where lower(candidate) = 'hillary clinton'
+order by sum desc ;
+--stany, w ktorych wygral Bernie Sanders
+create view v_wygrane_bernie as
+select * 
+from v_wyniki_po_stanach
+where lower(candidate) = 'bernie sanders'
+order by sum desc ;
+--odsetek ludzi w wieku >65 avg, min, max w kraju po stanach 
+select avg(cf.age775214) as sr_proc_powyzej_65,
+	   min(cf.age775214) as min_proc_powyzej_65,
+	   max(cf.age775214) as max_proc_powyzej_65
+from county_facts cf
+where cf.fips <> 0 and cf.state_abbreviation = '';
+--avg: 14.76, min: 9.4, max: 19.1
+--sprawdzenie srednich ods >65 rz w stanach gdzie wygrali donald trump
+with spr_wieku_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_powyzej_65_rz - ods_krajowy_powyzej_65 as roznica 
+from spr_wieku_donald;
+--korelacja liczby glosow a wieku > 65 u donalda
+with spr_wieku_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_powyzej_65_rz) from spr_wieku_donald; 
+--brak korelacji
+--sprawdzenie srednich ods >65 rz w stanach gdzie wygrali hillary clinton
+with spr_wieku_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_powyzej_65_rz - ods_krajowy_powyzej_65 as roznica 
+from spr_wieku_hillary;
+--korelacja liczby glosow a wieku > 65 u hillary
+with spr_wieku_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_powyzej_65_rz) from spr_wieku_hillary; 
+--brak korelacji
+--sprawdzenie srednich ods >65 rz w stanach gdzie wygrali bernie sanders
+with spr_wieku_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_bernie
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_powyzej_65_rz - ods_krajowy_powyzej_65 as roznica 
+from spr_wieku_bernie;
+--korelacja liczby glosow a wieku > 65 u berniego
+with spr_wieku_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age775214 as ods_powyzej_65_rz,
+	   (select cf2.age775214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_powyzej_65
+from v_wygrane_bernie vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_powyzej_65_rz) from spr_wieku_bernie ; 
+--brak korelacji
+--odsetek ludzi w wieku <5 avg, min, max w kraju po stanach
+select avg(cf.age135214) as sr_proc_ponizej_5,
+	   min(cf.age135214) as min_proc_ponizej_5,
+	   max(cf.age135214) as max_proc_ponizej_5
+from county_facts cf
+where cf.fips <> 0 and cf.state_abbreviation = '';
+--avg: 6.23, min: 4.9, max: 8.6
+--sprawdzenie srednich ods <5 rz w stanach gdzie wygrali donald trump
+with spr_wieku_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_ponizej_5_rz - ods_krajowy_ponizej_5 as roznica 
+from spr_wieku_donald;
+--korelacja liczby glosow a wieku > 65 u donalda
+with spr_wieku_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_ponizej_5_rz) from spr_wieku_donald; 
+--brak korelacji
+--sprawdzenie srednich ods <5 rz w stanach gdzie wygrali hillary clinton
+with spr_wieku_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_ponizej_5_rz - ods_krajowy_ponizej_5 as roznica 
+from spr_wieku_hillary;
+--korelacja liczby glosow a wieku > 65 u hillary
+with spr_wieku_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_ponizej_5_rz) from spr_wieku_hillary; 
+--brak korelacji
+--sprawdzenie srednich ods <5 rz w stanach gdzie wygrali bernie sanders
+with spr_wieku_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_bernie
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_ponizej_5_rz - ods_krajowy_ponizej_5 as roznica 
+from spr_wieku_bernie;
+--korelacja liczby glosow a wieku > 65 u berniego
+with spr_wieku_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.age135214 as ods_ponizej_5_rz,
+	   (select cf2.age135214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_ponizej_5
+from v_wygrane_bernie vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_ponizej_5_rz) from spr_wieku_bernie ; 
+--brak korelacji
+--odsetek kobiet avg, min, max w kraju 
+select avg(cf.sex255214) as sr_proc_kobiet,
+	   min(cf.sex255214) as min_proc_kobiet,
+	   max(cf.sex255214) as max_proc_kobiet
+from county_facts cf
+where cf.fips <> 0 and cf.state_abbreviation = '';
+--avg: 50.6, min: 47.4, max: 52.6
+--sprawdzenie ods kobiet w stanach gdzie wygrali donald trump
+with spr_plci_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_kobiet - ods_krajowy_kobiet as roznica 
+from spr_plci_donald;
+--korelacja liczby glosow a ods kobiet u donalda
+with spr_plci_donald as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_donalda vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_kobiet) from spr_plci_donald; 
+--brak korelacji
+--sprawdzenie ods kobiet w stanach gdzie wygrali hillary clinton
+with spr_plci_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_kobiet - ods_krajowy_kobiet as roznica 
+from spr_plci_hillary;
+--korelacja liczby glosow a ods kobiet u hillary
+with spr_plci_hillary as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_hillary
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_kobiet) from spr_plci_hillary; 
+--brak korelacji
+--sprawdzenie ods kobiet w stanach gdzie wygrali bernie sanders
+with spr_plci_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_bernie
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select *,
+	   ods_kobiet - ods_krajowy_kobiet as roznica 
+from spr_plci_bernie;
+--korelacja liczby glosow a ods kobiet u berniego
+with spr_plci_bernie as (
+select state, 
+	   candidate,
+	   sum lacznie_glosow,
+	   cf.sex255214 as ods_kobiet,
+	   (select cf2.sex255214 from county_facts cf2 where cf2.fips = 0) as ods_krajowy_kobiet
+from v_wygrane_bernie vwd
+join county_facts cf on state = cf.area_name
+order by sum desc)
+select corr(lacznie_glosow, ods_kobiet) from spr_plci_bernie ; 
+--brak korelacji
+--ciekawostki
+--stan z najwyzszym odsetkiem >65 rz, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age775214 = (select max(cf.age775214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '')
+group by 1, 2
+order by 3 desc;
+--max ods >65 w stanie to 19.1, wygrany hillary clinton
+--county z najwyzszym odsetkiem >65 rz, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age775214 = (select max(cf.age775214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '')
+group by 1, 2, 3
+order by 4 desc;
+--max ods >65 w county to 52.9, wygrany donald trump
+--stan z najnizszym odsetkiem >65 rz, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age775214 = (select min(cf.age775214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '')
+group by 1, 2
+order by 3 desc;
+--min ods >65 w stanie to 9.4, wygrany ted cruz
+--county z najnizszym odsetkiem >65 rz, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age775214 = (select min(cf.age775214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age775214 > 0)
+group by 1, 2, 3
+order by 4 desc;
+--min ods >65 w county to 4.1, wygrany hillary clinton
+--stan z najwyzszym odsetkiem <5 rz, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age135214 = (select max(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '')
+group by 1, 2
+order by 3 desc;
+select max(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '';
+--max ods <5 w stanie to 8.6, wygrany ted cruz
+--county z najwyzszym odsetkiem <5 rz, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age135214 = (select max(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '')
+group by 1, 2, 3
+order by 4 desc;
+select max(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '';
+--max ods <5 w county to 13.7, wygranego brak, nie ma wynikow dla wade hampton census county
+--stan z najnizszym odsetkiem <5 rz, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age135214 = (select min(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age135214 > 0)
+group by 1, 2
+order by 1, 3 desc;
+select min(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '' and cf.age135214 > 0;
+--min ods <5 w stanie to 4.9, 3 stany, wygrany bernie sanders w trzech
+--county z najnizszym odsetkiem <5 rz, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age135214 = (select min(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age135214 > 0)
+group by 1, 2, 3
+order by 4 desc;
+select min(cf.age135214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '' and cf.age135214 > 0;
+--min ods <5 w county to 1.5, wygrany donald trump
+--stan z najwyzszym odsetkiem kobiet, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.sex255214 = (select max(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '')
+group by 1, 2
+order by 3 desc;
+select max(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '';
+--max ods kobiet w stanie to 52.6, district of columbia, nie ma wynikow dla tego stanu
+--county z najwyzszym odsetkiem kobiet, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.sex255214 = (select max(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '')
+group by 1, 2, 3
+order by 4 desc;
+select max(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '';
+--max ods kobiet w county to 56.8, Pulaski County, Georgia, wygrany donald trump
+--stan z najnizszym odsetkiem kobiet, kto tam wygral
+select cf.area_name,
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow 
+from county_facts cf
+join primary_results pr on pr.state = cf.area_name
+where cf.fips <> 0 and cf.state_abbreviation = '' and cf.sex255214 = (select min(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '')
+group by 1, 2
+order by 3 desc;
+select min(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation = '';
+--min ods kobiet w stanie to 47.4, alaska, wygrany ted cruz
+--county z najnizszym odsetkiem kobiet, kto tam wygral
+select cf.area_name,
+	   pr.state, 
+	   pr.candidate,
+	   sum(pr.votes) suma_glosow
+from county_facts cf
+join primary_results pr on pr.fips = cf.fips 
+where cf.fips <> 0 and cf.state_abbreviation != '' and cf.sex255214 = (select min(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '' and cf.sex255214 > 0)
+group by 1, 2, 3
+order by 4 desc;
+select min(cf.sex255214) from county_facts cf where cf.fips <> 0 and cf.state_abbreviation != '' and cf.sex255214 > 0;
+--min ods kobiet w county to 30.1, Concho County, Texas, wygrany ted cruz
