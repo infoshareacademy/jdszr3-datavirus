@@ -69,7 +69,7 @@ from 	v_wyniki_po_stanach
 where row_number = 1;
 --end
 
---Test wstêpny - przygotowanie wskaznikow przedsiebiorczosci
+--Test wstepny - przygotowanie wskaznikow przedsiebiorczosci
 select 	* 
 ,		round("White-owned firms, percent, 2007" / "White alone, percent, 2014", 2) as "business_index"
 ,		round((("White-owned firms, percent, 2007" / "White alone, percent, 2014")/100 * votes),2) as "business_index_points"
