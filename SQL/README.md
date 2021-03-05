@@ -9,10 +9,9 @@
 1. [Dagmara Bromirska](https://github.com/dbromirska)
 
 ### Database used:
-* [2016-us-election](https://www.kaggle.com/benhamner/2016-us-election)
+[2016-us-election](https://www.kaggle.com/benhamner/2016-us-election)
 
-#### Folder **Code** contains all analysis made by the team in .sql files
-
-#### Folder **EDA** contains basic data check
-
-#### Folder **Presentation** contains .ppt file with statistics and conclusion
+### Content
+* Folder **Code** contains all analysis made by the team in .sql files
+* Folder **EDA** contains basic data check
+* Folder **Presentation** contains .ppt file with statistics and conclusion
