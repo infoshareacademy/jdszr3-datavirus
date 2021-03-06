@@ -69,7 +69,7 @@ from 	v_wyniki_po_stanach
 where row_number = 1;
 --end
 
---Test wstepny - przygotowanie wskaznikow przedsiebiorczosci
+--Test wstępny - przygotowanie wskaznikow przedsiebiorczosci
 select 	* 
 ,		round("White-owned firms, percent, 2007" / "White alone, percent, 2014", 2) as "business_index"
 ,		round((("White-owned firms, percent, 2007" / "White alone, percent, 2014")/100 * votes),2) as "business_index_points"
@@ -122,6 +122,7 @@ order by 1;
 --end
 
 --Zestawienie zwyciezcow w poszegolnych stanach z uwzglednieniem wskaznikow business_index i business_points
+create view v_wyniki as
 select 	ws.state
 ,		ws.candidate
 ,		pa.party
@@ -139,6 +140,64 @@ join v_business_index_scores bi on ws.state = bi.area_name
 join party pa on pa.candidate = ws.candidate
 order by 5 desc;
 
+--Zestawienie srednich wynikow business_points wg zwyciezcow
+select 	candidate
+,		party
+,		round(avg(white_business_points), 2) as avg_white
+,		round(avg(black_business_points), 2) as avg_black
+,		round(avg(asian_business_points), 2) as avg_asian
+,		round(avg(latino_business_points), 2) as avg_latino
+from 	v_wyniki
+group by 1, 2
+order by 3 desc;
 
+--Zestawienie srednich wynikow business_points wg zwyciezcow (dla partii)
+select 	party
+,		round(avg(white_business_points), 2) as avg_white
+,		round(avg(black_business_points), 2) as avg_black
+,		round(avg(asian_business_points), 2) as avg_asian
+,		round(avg(latino_business_points), 2) as avg_latino
+from 	v_wyniki
+group by 1
+order by 2 desc;
 
+--Zestawienie zwyciezcow w poszegolnych stanach z uwzglednieniem wskaznikow business_index i business_points
+create view v_wyniki_v2 as
+select 	ws.state
+,		ws.candidate
+,		pa.party
+,		ws."sum"
+,		bi.white_business_index as "white_business_index"
+--,		round((bi.white_business_index  *  ws."sum" / 100), 2) as "white_business_points"
+,		bi.black_business_index as "black_business_index"
+--,		round((bi.black_business_index  *  ws."sum" / 100), 2) as "black_business_points"
+,		bi.asian_business_index as "asian_business_index"
+--,		round((bi.asian_business_index  *  ws."sum" / 100), 2) as "asian_business_points"
+,		bi.latino_business_index as "latino_business_index"
+--,		round((bi.latino_business_index  *  ws."sum" / 100), 2) as "latino_business_points"
+from v_wygrani_po_stanach ws
+join v_business_index_scores bi on ws.state = bi.area_name 
+join party pa on pa.candidate = ws.candidate
+order by 5 desc;
+
+--Zestawienie srednich wynikow business_index wg zwyciezcow 
+select 	candidate
+,		party
+,		round(avg(white_business_index), 2) as avg_white
+,		round(avg(black_business_index), 2) as avg_black
+,		round(avg(asian_business_index), 2) as avg_asian
+,		round(avg(latino_business_index), 2) as avg_latino
+from 	v_wyniki_v2
+group by 1, 2
+order by 2 desc, 3 desc;
+
+--Zestawienie srednich wynikow business_index wg zwyciezcow (partie)
+select 	party
+,		round(avg(white_business_index), 2) as avg_white
+,		round(avg(black_business_index), 2) as avg_black
+,		round(avg(asian_business_index), 2) as avg_asian
+,		round(avg(latino_business_index), 2) as avg_latino
+from 	v_wyniki_v2
+group by 1
+order by 2 desc;
 
