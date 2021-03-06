@@ -201,3 +201,4 @@ from 	v_wyniki_v2
 group by 1
 order by 2 desc;
 
+
