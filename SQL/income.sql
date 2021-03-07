@@ -356,8 +356,4 @@ select unnest(percentile_disc(array[0.25, 0.5, 0.75]) within group (order by peo
 from same_stany_kategorie as ssk
 inner join v_winner_hc as whc
 on ssk.state=whc.state;
-
 --
-
-
-
