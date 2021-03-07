@@ -9,3 +9,6 @@ In this section you can find analysis on race and businnes of the USA in the 201
 
 #### houseudolds1.sql
 In this section you can find analysis on houheholds of the USA in the 2016 election
+
+#### income.sql
+In this section you can find analysis on income and employment of the USA in the 2016 election
