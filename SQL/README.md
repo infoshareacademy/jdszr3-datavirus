@@ -13,5 +13,5 @@
 
 ### Content
 * Folder **Code** contains all analysis made by the team in .sql files
-* Folder **EDA** contains basic data check
+* Folder **Code**/**EDA** contains basic data check
 * Folder **Presentation** contains .ppt file with statistics and conclusion
