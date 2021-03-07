@@ -8,4 +8,3 @@ Wstępna analiza danych!
 4. Sprawdzenie czy przy łączeniu tabel primar_results i county_facts występują wiersze, które nie spełniają warunku łączenia - identyfikator fiips w obu tabelach.
 
 Występuje 11 stanów - te stany zostały pominięte w analizie
-
