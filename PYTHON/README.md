@@ -10,7 +10,24 @@
 
 ### Database used:
 [Cardiocascular Disease Dataset](https://www.kaggle.com/sulianova/cardiovascular-disease-dataset)
+#### Features of data (analysis)
+* Age | Objective Feature | age | int (days)
+* Height | Objective Feature | height | int (cm) |
+* Weight | Objective Feature | weight | float (kg) |
+* Gender | Objective Feature | gender | categorical code |
+* Systolic blood pressure | Examination Feature | ap_hi | int |
+* Diastolic blood pressure | Examination Feature | ap_lo | int |
+* Cholesterol | Examination Feature | cholesterol | 1: normal, 2: above normal, 3: well above normal |
+* Glucose | Examination Feature | gluc | 1: normal, 2: above normal, 3: well above normal |
+* Smoking | Subjective Feature | smoke | binary |
+* Alcohol intake | Subjective Feature | alco | binary |
+* Physical activity | Subjective Feature | active | binary |
+* Presence or absence of cardiovascular disease | Target Variable | cardio | binary |
+
+### Application
+Dataset visualization for main risk factors impacting cardiovascular disease presence
 
 ### Content
-* Folder **code** contains all analysis made by the team in .ipynb files including EDA
+* Folder **code** contains all analysis made by the team in .ipynb files including EDA and final application
 * Folder **presentation** contains .ppt file with approach to data and statistics
+
