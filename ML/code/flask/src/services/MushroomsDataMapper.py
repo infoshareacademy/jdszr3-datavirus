@@ -1,5 +1,6 @@
 import joblib
 import pandas as pd
+import os
 
 class MushroomsDataMapper:
     @staticmethod
@@ -22,9 +23,12 @@ class MushroomsDataMapper:
 
 
         test_data=pd.DataFrame(result, index=[0])
-        #print(test_data)
 
-        trained_model = joblib.load('RandomForestClassifier().pkl')
+        model_dir = os.path.dirname(os.path.abspath(__file__))   
+        model_path = os.path.join(model_dir, "models/RandomForestClassifier(max_depth=12, n_estimators=10).pkl")
+
+        trained_model = joblib.load(model_path)
+
         prediction = trained_model.predict(test_data)
-        msg=1
+        msg=prediction[0]
         return msg
