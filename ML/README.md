@@ -34,10 +34,7 @@
 * population: abundant=a,clustered=c,numerous=n,scattered=s,several=v,solitary=y
 * habitat: grasses=g,leaves=l,meadows=m,paths=p,urban=u,waste=w,woods=d
 
-### Application
-#### app.py - allows user to check, specifying 7 features, if mushroom is edible
-
 ### Content
-* Folder **code** contains all analysis made by the team in .ipynb files including EDA folder with EDA analysis
+* Folder **code** contains all analysis made by the team in .ipynb files including EDA folder with EDA analysis and flask folder with application
 * Folder **presentation** contains .ppt file with gathered statistics and results of modelling
 
