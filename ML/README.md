@@ -39,5 +39,5 @@
 
 ### Content
 * Folder **code** contains all analysis made by the team in .ipynb files including EDA folder with EDA analysis
-* Folder **presentation** contains .ppt file with approach to data, statistics, modelling
+* Folder **presentation** contains .ppt file with gathered statistics and results of modelling
 
