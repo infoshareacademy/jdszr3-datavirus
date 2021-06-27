@@ -1,0 +1,184 @@
+{% extends "index.html" %}
+{% block title %}Mushroom classification{% endblock %}
+
+{% block content %}
+    {% with messages  = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages%}
+                <p>{{msg}}</p>
+            {% endfor%}
+        {% endif %}
+    {% endwith %}
+    <form action="{{ url_for('main_controller.results') }}" method="post">
+        <div class="form-group">
+            <h5>Select mushroom cap shape:</h3>
+            <img src="/static/images/mushroom-cap-shapes.JPG" class="img-fluid d-block"/>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios1" id="radio1_1" value="cap-shape_x" checked>
+                <label class="form-check-label" for="radio1_1">
+                    Convex
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios1" id="radio1_2" value="cap-shape_b">
+                <label class="form-check-label" for="radio1_2">
+                    Bell-Shaped
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios1" id="radio1_3" value="cap-shape_f">
+                <label class="form-check-label" for="radio1_3">
+                    Flat
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios1" id="radio1_4" value="cap-shape_s">
+                <label class="form-check-label" for="radio1_4">
+                    Sunken
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios1" id="radio1_5" value="cap-shape_other">
+                <label class="form-check-label" for="radio1_5">
+                    Other
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select mushroom cap surface:</h3>
+            <img src="/static/images/mushroom-cap-surfaces.JPG" class="img-fluid d-block"/>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios2" id="radio2_1" value="cap-surface_s" checked>
+                <label class="form-check-label" for="radio2_1">
+                    Smooth
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios2" id="radio2_2" value="cap-surface_f">
+                <label class="form-check-label" for="radio2_2">
+                    Hairy or fibrous
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios2" id="radio2_3" value="cap-surface_y">
+                <label class="form-check-label" for="radio2_3">
+                    Scaly
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios2" id="radio2_4" value="cap-surface_g">
+                <label class="form-check-label" for="radio2_4">
+                    Grooves
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select mushroom cap color:</h3>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_1" value="cap-color_n" checked>
+                <label class="form-check-label" for="radio3_1">
+                    Brown
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_4" value="cap-color_g">
+                <label class="form-check-label" for="radio3_4">
+                    Gray
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_8" value="cap-color_e">
+                <label class="form-check-label" for="radio3_8">
+                    Red
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_9" value="cap-color_w">
+                <label class="form-check-label" for="radio3_9">
+                    White
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_10" value="cap-color_y">
+                <label class="form-check-label" for="radio3_10">
+                    Yellow
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios3" id="radio3_2" value="cap-color_other">
+                <label class="form-check-label" for="radio3_2">
+                    Other
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select if mushroom has bruises:</h3>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios4" id="radio4_1" value="bruises_t" checked>
+                <label class="form-check-label" for="radio4_1">
+                    Yes
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios4" id="radio4_2" value="bruises_f">
+                <label class="form-check-label" for="radio4_2">
+                    No
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select mushroom gill spacing:</h3>
+            <img src="/static/images/gill-spacing.JPG" class="img-fluid d-block"/>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios5" id="radio5_1" value="gill-spacing_w" checked>
+                <label class="form-check-label" for="radio4_1">
+                    Crowded
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios5" id="radio5_2" value="gill-spacing_c">
+                <label class="form-check-label" for="radio4_2">
+                    Close
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select mushroom stalk shape:</h3>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios6" id="radio6_1" value="stalk-shape_e" checked>
+                <label class="form-check-label" for="radio6_1">
+                    Enlarging
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios6" id="radio6_2" value="stalk-shape_t">
+                <label class="form-check-label" for="radio6_2">
+                    Tapering
+                </label>
+            </div>
+        </div>
+        <div class="form-group mt-5">
+            <h5>Select mushroom ring number:</h3>
+            <img src="/static/images/ring-number.png" class="img-fluid d-block"/>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios7" id="radio7_1" value="ring-number_o" checked>
+                <label class="form-check-label" for="radio7_1">
+                    One
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios7" id="radio7_2" value="ring-number_t">
+                <label class="form-check-label" for="radio7_2">
+                    Two
+                </label>
+            </div>
+            <div class="form-check d-inline-block">
+                <input class="form-check-input" type="radio" name="radios7" id="radio7_3" value="ring-number_n">
+                <label class="form-check-label" for="radio7_3">
+                    None
+                </label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary d-block mt-3">Submit</button>
+      </form>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "index.html" %}
+
+
+{% block content %}
+    {% if msg %}
+    <img src="/static/images/dont_eat.jpg" class="img-fluid d-block"/>
+    {% else %}
+    <img src="/static/images/eat_me.jpg" class="img-fluid d-block"/>
+    {% endif %}
+{% endblock %}
