@@ -1,0 +1,17 @@
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8  offset-lg-2">
+            <h2 class="mt-5">Sign Language Recognition by DataVirus</h2>
+			<form method="post" action="{{ url_for('tasks') }}">
+			<input type="submit" value="Capture" name="click"/>
+			<input type="submit" value="Grey" name="grey" />
+			<input type="submit" value="Start/Stop Recording" name="rec" />
+			<input type="submit" value="Upload" name="upload" />
+			</form>
+            <img src="{{ url_for('video_feed') }}" height="80%">
+        </div>
+    </div>
+</div>
+</body>
