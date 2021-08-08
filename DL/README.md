@@ -1,5 +1,5 @@
 ### Created under InfoShare Academy
-## Deep Learning Project: CNN for sign language prediction.
+## Deep Learning Project: CNN for sign language recognition.
 
 ### Project prepared by: 
 1. [Małgorzata Szczypiór](https://github.com/malgorzata-szczypior)
